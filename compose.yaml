@@ -1,0 +1,60 @@
+services:
+  # DATABASE: database será el nombre de este servicio.
+  # Servirá para poder hacer referencia a él desde el resto de servicios.
+  database:
+
+    # Este contenedor se creará a partir de la siguiente imagen (de docker hub)
+    image: mongo:7.0.5
+
+    container_name: db
+    environment:
+    # Estas variables de entorno definen al usuario root:
+    # además activan el modo seguro de la MongoDB
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+    # Esta es la base de datos que usará de inicio Mongo:
+    # Usaremos "admin" porque es la db que guarda los usuarios de Mongo
+    # Así estará ya seleccionada para crear un nuevo usuario la primera vez
+      - MONGO_INITDB_DATABASE
+    
+    # Estas son las variables de entorno que definen al usuario de la API y su contraseña, también el nombre de la base de datos. [TODO: COMENTAR!!!] (0,5 puntos)
+      - MONGO_API_USER
+      - MONGO_API_PWD
+      - MONGO_DB_NAME
+    
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - db-volume:/data/db
+
+
+  # SERVER: esta será nuestra API. Aplicación que se ejecutará en el lado del servidor.
+  # Se encargará de comunicarse tanto con el cliente como con la base de datos.
+  server:
+    build: ./app
+    container_name: api
+    environment:
+      - MONGO_API_USER
+      - MONGO_API_PWD
+      - MONGO_DB_NAME
+    ports:
+      - 3000:3000
+    # Con el depends_on aeguramos el orden de arranque y de apagado, por lo que primero se iniciará la database y después el server. [TODO: COMENTAR!!!] (0,25 puntos)
+    depends_on:
+      - database
+
+
+  # CLIENT: esta será nuestra web. Aplicación que se ejecutará en el lado del cliente.
+  # Mostrará al usuario final la aplicación de lista de tareas.
+  client:
+    build: ./web
+    container_name: web
+    ports:
+      - 8080:80
+    # Igual que en el anterior, la database y el server arrancarán primero, en ese orden, y después se iniciará el client. [TODO: COMENTAR!!!] (0,25 puntos)
+    depends_on:
+      - server
+
+volumes:
+  db-volume:

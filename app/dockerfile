@@ -1,0 +1,15 @@
+# TODO: COMENTAR!!!
+# El FROM es la imagen de partida para crear nuestra imagen. (0,2 puntos)
+FROM node:20.11.1-alpine3.19
+# El WORKDIR establece el directorio de trabajo para el contenedor. (0,2 puntos)
+WORKDIR /app
+# El COPY se encarga de copiar un fichero o directorio local a la imagen. (0,2 puntos)
+COPY package.json ./
+# El RUN ejecuta un comando sobre la imagen base. (0,2 puntos)
+RUN npm install 
+# El COPY se encarga de copiar un fichero o directorio local a la imagen. (0,2 puntos)
+COPY src /app/src
+# El EXPOSE indica los puertos que serán expuestos en el contenedor. (0,3 puntos)
+EXPOSE 3000 
+# El CMD es el comando que se ejecuta al lanzar un contenedor. (0,2 puntos)
+CMD ["node", "src/server.js"]
